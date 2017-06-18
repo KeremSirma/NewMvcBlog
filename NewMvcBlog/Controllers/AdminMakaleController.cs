@@ -34,9 +34,9 @@ namespace NewMvcBlog.Controllers
 
         // POST: AdminMakale/Create
         [HttpPost]
-        public ActionResult Create(Makale makale,string etiketler,HttpPostedFileBase Foto)
+        public ActionResult Create(Makale makale, string etiketler, HttpPostedFileBase Foto)
         {
-           if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 if (Foto != null)
                 {
@@ -45,7 +45,7 @@ namespace NewMvcBlog.Controllers
                     string newfoto = Guid.NewGuid().ToString() + fotoInfo.Extension;
                     img.Resize(800, 350);
                     img.Save("~/Uploads/MakaleFoto/" + newfoto);
-                    makale.Foto = "Uploads/MakaleFoto/" + newfoto;
+                    makale.Foto = "/Uploads/MakaleFoto/" + newfoto;
                     db.Makales.Add(makale);
                 }
                 if (etiketler != null)
@@ -64,39 +64,73 @@ namespace NewMvcBlog.Controllers
                 return RedirectToAction("Index");
             }
 
-               
-          
-           
-                return View(makale);
-            
+
+
+
+            return View(makale);
+
         }
 
         // GET: AdminMakale/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var makale = db.Makales.Where(m => m.MakaleId == id).SingleOrDefault();
+            if (makale == null)
+            {
+                return HttpNotFound();
+            }
+            ViewBag.KategoriId = new SelectList(db.Kategoris, "KategoriId", "KategoriAdi", makale.KategoriId);
+            return View(makale);
         }
 
         // POST: AdminMakale/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(int id, HttpPostedFileBase Foto, Makale makale)
         {
             try
             {
+                var makales = db.Makales.Where(m => m.MakaleId == id).SingleOrDefault();
+                if (Foto != null)
+                {
+                    if (System.IO.File.Exists(Server.MapPath(makales.Foto)))
+                    {
+                        System.IO.File.Delete(Server.MapPath(makales.Foto));
+
+                    }
+
+                    WebImage img = new WebImage(Foto.InputStream);
+                    FileInfo fotoInfo = new FileInfo(Foto.FileName);
+                    string newfoto = Guid.NewGuid().ToString() + fotoInfo.Extension;
+                    img.Resize(800, 350);
+                    img.Save("~/Uploads/MakaleFoto/" + newfoto);
+                    makales.Foto = "/Uploads/MakaleFoto/" + newfoto;
+                    makales.Baslik = makale.Baslik;
+                    makales.Icerik = makale.Icerik;
+                    makales.KategoriId = makale.KategoriId;
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+
+                }
+                return View();
+
                 // TODO: Add update logic here
 
-                return RedirectToAction("Index");
             }
             catch
             {
-                return View();
+                ViewBag.KategoriId = new SelectList(db.Kategoris, "KategoriId", "KategoriAdi", makale.KategoriId);
+
+                return View(makale);
             }
         }
 
         // GET: AdminMakale/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var makales = db.Makales.Where(m => m.MakaleId == id).SingleOrDefault();
+            if (makales == null)
+            { return HttpNotFound(); }
+            return View(makales);
         }
 
         // POST: AdminMakale/Delete/5
@@ -105,8 +139,26 @@ namespace NewMvcBlog.Controllers
         {
             try
             {
-                // TODO: Add delete logic here
+                var makales = db.Makales.Where(m => m.MakaleId == id).SingleOrDefault();
+                if (makales == null)
+                {
+                    return HttpNotFound();
+                }
+                if (System.IO.File.Exists(Server.MapPath(makales.Foto)))
+                {
+                    System.IO.File.Delete(Server.MapPath(makales.Foto));
 
+                }
+                foreach (var i in makales.Yorums.ToList())
+                {
+                    db.Yorums.Remove(i);
+                }
+                foreach (var i in makales.Etikets.ToList())
+                {
+                    db.Etikets.Remove(i);
+                }
+                db.Makales.Remove(makales);
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
             catch

@@ -46,7 +46,6 @@ namespace NewMvcBlog.Controllers
                     img.Resize(800, 350);
                     img.Save("~/Uploads/MakaleFoto/" + newfoto);
                     makale.Foto = "/Uploads/MakaleFoto/" + newfoto;
-                    db.Makales.Add(makale);
                 }
                 if (etiketler != null)
                 {
@@ -58,6 +57,7 @@ namespace NewMvcBlog.Controllers
                         makale.Etikets.Add(yenietiket);
                     }
                 }
+                makale.UyeId = Convert.ToInt32(Session["uyeId"]);
                 db.Makales.Add(makale);
                 db.SaveChanges();
 

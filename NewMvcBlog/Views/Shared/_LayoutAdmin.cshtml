@@ -1,4 +1,17 @@
-﻿<!DOCTYPE html>
+﻿@{ 
+    if(Session["yetkiId"]==null)
+    {
+        Response.Redirect("~/Home/Index");
+
+    }
+    if(Convert.ToInt32(Session["yetkiId"])!=1)
+    {
+        Response.Redirect("~/Home/Index");
+
+    }
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">

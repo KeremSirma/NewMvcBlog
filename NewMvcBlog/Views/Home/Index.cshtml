@@ -1,23 +1,51 @@
-﻿
+﻿@using PagedList
+@using PagedList.Mvc
+
+@model IPagedList<NewMvcBlog.Models.Makale>
 @{
     ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="col-md-8">
-    <article class="col-sm-12">
-        <h2>
-            <a href="#">Blog Post Title</a>
-        </h2>
-        <p class="lead">
-            by <a href="index.php">Start Bootstrap</a>
-        </p>
-        <p><span class="glyphicon glyphicon-time"></span> Posted on August 28, 2013 at 10:00 PM</p>
-        <hr>
-        <img class="img-responsive" src="http://placehold.it/900x300" alt="">
-        <hr>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolore, veritatis, tempora, necessitatibus inventore nisi quam quia repellat ut tempore laborum possimus eum dicta id animi corrupti debitis ipsum officiis rerum.</p>
-        <a class="btn btn-primary" href="#">Read More <span class="glyphicon glyphicon-chevron-right"></span></a>
-        <hr>
-    </article>
+    @foreach (var item in Model)
+    {
+        <article class="col-sm-12">
+            <h2>
+                <a href="/Home/MakaleDetay/@item.MakaleId">@item.Baslik</a>
+            </h2>
+            <p class="lead">
+              <img class="img-circle img-responsive " width="50" src= "@item.Uye.Foto" alt="@item.Uye.AdSoyad" /> <a href="/Uye/Index/@item.Uye.UyeId">@item.Uye.KullaniciAdi</a>
+            
+            <span class="glyphicon glyphicon-time"></span> @String.Format("{0: MMM yyy}",@item.Tarih)
+                <span class="glyphicon glyphicon-tags"> @item.Etikets.Count</span>
+            </p>
+           
+                <hr>
+                <img class="img-responsive" src="@item.Foto" alt="@item.Baslik">
+                <hr>
+                @if (item.Icerik.Length > 150 )
+                {
+
+                    <p>@Html.Raw(item.Icerik.Substring(0, 150))...</p>
+                }
+                else
+                {
+                    <p>
+                        @Html.Raw(item.Icerik)...
+                    </p>
+                }
+                <a class="btn btn-primary" href="/Home/MakaleDetay/@item.MakaleId">Devamını Oku <span class="glyphicon glyphicon-chevron-right"></span></a>
+                <hr>
+</article>
+    }
+    
+    <div class="row">
+        <div class="col-md-8 text-center">
+            <div class="pagedList pagination-lg">
+                @Html.PagedListPager(Model,Page=>Url.Action("Index",new { Page}),PagedListRenderOptions.Classic)
+            </div>
+        </div>
+    </div>
 </div>
 
